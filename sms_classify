@@ -1,0 +1,86 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Training
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+load sms.mat;  % loads the following variables
+
+% X_train  contains information about the words within the training
+%          messages. the ith row represents the ith training message. 
+%          for a particular text, the entry in the jth column tells
+%          you how many times the jth dictionary word appears in 
+%          that message
+%
+% X_test   similar but for test set
+%
+% y_train  ith entry indicates whether message i is spam
+%
+% y_test   similar
+%
+% dict     Cell array whose jth entry is the jth dictionary word
+
+[m, n] = size(X_train);
+%X_train([1],:)
+
+%X_fst = X_train([1],:);
+%X_normalize = normalize_features(X_train([2:3],:));
+X_train = normalize_features(X_train);
+
+% Initialize theta
+theta_init = zeros(n,1);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Train
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%  - learn theta by gradient descent 
+alpha = 0.00001;
+iters = 100;
+[theta, J_history] = gradient_descent(X_train, y_train, theta_init, alpha, iters);
+
+%  - plot the cost history
+costsz = size(J_history, 2);
+complexity = 1:costsz;
+
+subplot (1, 1, 1);
+plot(complexity, J_history);
+xlabel('Complexity');
+ylabel('Cost');
+title('Cost vs Complexity');
+%  - tune step size and # iterations if necessary
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Testing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%  - use theta to make predictions for test set
+z = theta' * X_test';
+y = logistic(z);
+
+%  - print the accuracy on the test set---i.e., the precent of messages misclassified
+total_msgs = size(X_test,1);
+
+% define: if predicted to be spam by logistic regression, y = 1
+predicted_spam = (logistic(z) >= 0.5)'
+% how many msgs were correctly predicted as spam?
+crrct_spam = sum(y_test==1 & predicted_spam==1)
+% how many msgs were correctly predicted as ham?
+crrct_ham = sum(y_test == 0 & predicted_spam ==0 )
+
+percent_crrct = ((crrct_spam +crrct_ham)/total_msgs)*100
+
+%text = ' check this out hhtp://google.com ';
+
+text=input('enter message', 's');
+x_my= sms_extract_features(text, dict);
+y_my= logistic(theta'*x_my');
+
+
+if y_my >=0.5
+    fprintf('i think its spam\n')
+else
+    fprintf('i think its ham\n')
+end
+
